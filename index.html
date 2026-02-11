@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星云实验室 | Nebula Labs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #121214;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1aa;
+            --accent-gold: #c9a961;
+            --accent-gold-light: #e8d5a3;
+            --accent-cyan: #00d4aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* 噪点纹理背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* 导航 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(10,10,12,0.9), transparent);
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-gold);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 8rem 3rem;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 .highlight {
+            color: var(--accent-gold);
+            font-style: italic;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-gold-light);
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+
+        .cta-button:hover::before {
+            left: 0;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(201, 169, 97, 0.3);
+        }
+
+        /* 装饰性元素 */
+        .hero-decoration {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .deco-line {
+            position: absolute;
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            opacity: 0.3;
+        }
+
+        .deco-line-1 {
+            top: 30%;
+            left: 10%;
+            transform: rotate(-15deg);
+        }
+
+        .deco-line-2 {
+            bottom: 25%;
+            right: 15%;
+            transform: rotate(20deg);
+        }
+
+        .deco-circle {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border: 1px solid var(--accent-gold);
+            border-radius: 50%;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* About Section */
+        .about {
+            padding: 10rem 3rem;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .section-header {
+            max-width: 1400px;
+            margin: 0 auto 5rem;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .about-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* Services Section */
+        .services {
+            padding: 10rem 3rem;
+            background: var(--bg-primary);
+        }
+
+        .services-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .service-card {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(18,18,20,0.5), rgba(10,10,12,0.5));
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(201, 169, 97, 0.3);
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: rgba(201, 169, 97, 0.15);
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            line-height: 1;
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-title {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .service-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        /* Team Section */
+        .team {
+            padding: 10rem 3rem;
+            background: var(--bg-secondary);
+        }
+
+        .team-grid {
+            max-width: 1400px;
+            margin: 5rem auto 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .team-card {
+            text-align: center;
+            transition: transform 0.4s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .team-photo {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1a1a1c, #0a0a0c);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--accent-gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 700;
+        }
+
+        .team-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .team-role {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 10rem 3rem;
+            background: var(--bg-primary);
+            text-align: center;
+        }
+
+        .contact-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-text {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+        }
+
+        .contact-email {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+        }
+
+        .contact-email:hover {
+            color: var(--accent-gold-light);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(201, 169, 97, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem 3rem;
+            background: var(--bg-primary);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 6rem 1.5rem;
+            }
+
+            .services-grid,
+            .team-grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .about,
+            .services,
+            .team,
+            .contact {
+                padding: 6rem 1.5rem;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">星云<span>实验室</span></div>
+        <ul class="nav-links">
+            <li><a href="#about">关于</a></li>
+            <li><a href="#services">服务</a></li>
+            <li><a href="#team">团队</a></li>
+            <li><a href="#contact">联系</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-decoration deco-line deco-line-1"></div>
+        <div class="hero-decoration deco-line deco-line-2"></div>
+        <div class="hero-decoration deco-circle"></div>
+
+        <div class="hero-content">
+            <div class="hero-badge">Est. 2020</div>
+            <h1>我们创造<br><span class="highlight">数字未来</span></h1>
+            <p>星云实验室是一家专注于前沿科技的创新型公司，致力于将人工智能、区块链和虚拟现实技术融合，为下一代互联网构建基础架构。</p>
+            <a href="#contact" class="cta-button">开启合作</a>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="section-header">
+            <div class="section-label">About Us</div>
+            <h2 class="section-title">关于我们</h2>
+        </div>
+        <div class="about-content">
+            <div class="about-text">
+                <p>星云实验室诞生于2020年，一群对技术充满热爱的梦想家汇聚在一起，开始探索数字世界的无限可能。</p>
+                <p>我们相信，真正的创新来自于对未来的大胆想象和脚踏实地的技术实践。我们的使命是通过技术创新，为人类创造更美好的数字生活体验。</p>
+                <p>从AI驱动的智能解决方案，到去中心化的Web3应用，再到沉浸式的VR体验，我们在多个前沿领域持续探索，不断突破技术边界。</p>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">完成项目</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">团队成员</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">技术专利</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">客户满意</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services" id="services">
+        <div class="section-header">
+            <div class="section-label">What We Do</div>
+            <h2 class="section-title">我们的服务</h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <span class="service-number">01</span>
+                <div class="service-icon">🤖</div>
+                <h3 class="service-title">AI 解决方案</h3>
+                <p class="service-desc">基于深度学习和自然语言处理，为企业定制智能化解决方案，提升效率，创造价值。</p>
+            </div>
+            <div class="service-card">
+                <span class="service-number">02</span>
+                <div class="service-icon">⛓️</div>
+                <h3 class="service-title">区块链开发</h3>
+                <p class="service-desc">构建安全、透明的去中心化应用，从智能合约到DeFi平台，覆盖全栈区块链开发。</p>
+            </div>
+            <div class="service-card">
+                <span class="service-number">03</span>
+                <div class="service-icon">🌐</div>
+                <h3 class="service-title">Web3 应用</h3>
+                <p class="service-desc">打造下一代互联网应用，集成钱包、NFT、DAO等Web3核心功能，引领行业变革。</p>
+            </div>
+            <div class="service-card">
+                <span class="service-number">04</span>
+                <div class="service-icon">🥽</div>
+                <h3 class="service-title">VR/AR 体验</h3>
+                <p class="service-desc">创建沉浸式虚拟现实体验，应用于教育、娱乐、工业等多个领域的创新应用。</p>
+            </div>
+            <div class="service-card">
+                <span class="service-number">05</span>
+                <div class="service-icon">☁️</div>
+                <h3 class="service-title">云架构设计</h3>
+                <p class="service-desc">为企业提供高可用、可扩展的云计算解决方案，降低运维成本，提升业务连续性。</p>
+            </div>
+            <div class="service-card">
+                <span class="service-number">06</span>
+                <div class="service-icon">📊</div>
+                <h3 class="service-title">数据分析</h3>
+                <p class="service-desc">从海量数据中提取洞察，通过机器学习和可视化，让数据驱动决策成为可能。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="team" id="team">
+        <div class="section-header">
+            <div class="section-label">Our Team</div>
+            <h2 class="section-title">核心团队</h2>
+        </div>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-photo">张</div>
+                <h3 class="team-name">张星河</h3>
+                <p class="team-role">创始人 & CEO</p>
+            </div>
+            <div class="team-card">
+                <div class="team-photo">李</div>
+                <h3 class="team-name">李明月</h3>
+                <p class="team-role">技术总监</p>
+            </div>
+            <div class="team-card">
+                <div class="team-photo">王</div>
+                <h3 class="team-name">王云帆</h3>
+                <p class="team-role">产品负责人</p>
+            </div>
+            <div class="team-card">
+                <div class="team-photo">陈</div>
+                <h3 class="team-name">陈雨桐</h3>
+                <p class="team-role">设计总监</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="section-header">
+            <div class="section-label">Get In Touch</div>
+            <h2 class="section-title">联系我们</h2>
+        </div>
+        <div class="contact-content">
+            <p class="contact-text">无论您有项目需求、合作意向，还是只是想聊聊技术，我们随时欢迎您的来信。</p>
+            <a href="mailto:hello@nebula-labs.com" class="contact-email">hello@nebula-labs.com</a>
+            <div class="social-links">
+                <a href="#" class="social-link">𝕏</a>
+                <a href="#" class="social-link">in</a>
+                <a href="#" class="social-link">▶</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="copyright">© 2025 星云实验室 Nebula Labs. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="#">隐私政策</a>
+            <a href="#">服务条款</a>
+            <a href="#">人才招聘</a>
+        </div>
+    </footer>
+</body>
+</html>
